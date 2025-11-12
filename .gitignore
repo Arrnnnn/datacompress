@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Images (too large for GitHub)
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+*.gif
+!sample_image.jpg
+!comparison_*.jpg
+!final_comparison_*.jpg
+
+# Videos
+*.mp4
+*.avi
+*.mov
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+~*
+
+# Project specific
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Large output files
+reconstructed_*.jpg
+improved_jpeg_q*.jpg
+paper_result_*.jpg
+improved_result_*.jpg
+improved_grayscale_*.jpg
+
+# Keep only essential comparison images
+!final_comparison_q50.jpg
+!detail_comparison_q50.jpg

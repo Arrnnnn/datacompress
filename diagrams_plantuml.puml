@@ -1,0 +1,699 @@
+@startuml Figure_1_1_General_Architecture
+!theme plain
+skinparam rectangle {
+  BackgroundColor<<input>> #E3F2FD
+  BackgroundColor<<compress>> #E8F5E9
+  BackgroundColor<<data>> #FFF9C4
+  BackgroundColor<<decompress>> #FFE0B2
+  BackgroundColor<<output>> #E3F2FD
+  BorderColor #1976D2
+  FontSize 11
+}
+skinparam arrow {
+  Color #1976D2
+  Thickness 3
+}
+
+title : General Architecture of JPEG Compression System
+
+rectangle "**INPUT IMAGE**\n\nRGB Color Image\n480×520 pixels\n748 KB" as input <<input>>
+
+rectangle "**COMPRESSION\nPROCESS**\n\n8 Steps Pipeline\nDCT, Quantization,\nEntropy Coding" as compress <<compress>>
+
+rectangle "**COMPRESSED\nDATA**\n\nBitstream\n~15 KB\n45:1 ratio" as data <<data>>
+
+rectangle "**DECOMPRESSION\nPROCESS**\n\nReverse Pipeline\nEntropy Decode,\nDequantize, IDCT" as decompress <<decompress>>
+
+rectangle "**OUTPUT IMAGE**\n\nReconstructed RGB\nPSNR: 22.2 dB\n480×520 pixels" as output <<output>>
+
+input -right-> compress : Encode
+compress -right-> data : Store/\nTransmit
+data -right-> decompress : Decode
+decompress -right-> output : Reconstruct
+
+note bottom of input
+  Original uncompressed
+  Full quality
+end note
+
+note bottom of compress
+  Multiple processing steps
+  Adaptive algorithms
+end note
+
+note bottom of data
+  Highly compressed
+  35% smaller than standard
+end note
+
+note bottom of decompress
+  Lossless decoding
+  Quality restoration
+end note
+
+note bottom of output
+  High quality reconstruction
+  Full color support
+end note
+
+@enduml
+
+@startuml Figure_1_1_Alternative_Horizontal
+!theme plain
+skinparam defaultTextAlignment center
+
+title Figure 1.1: General Architecture of JPEG Compression System (Horizontal Layout)
+
+card "INPUT IMAGE" as input #E3F2FD [
+  RGB Color Image
+  ----
+  480×520 pixels
+  748 KB
+]
+
+card "COMPRESSION" as compress #E8F5E9 [
+  8 Steps Pipeline
+  ----
+  • DCT Transform
+  • Quantization
+  • Entropy Coding
+]
+
+card "COMPRESSED DATA" as data #FFF9C4 [
+  Bitstream
+  ----
+  ~15 KB
+  45:1 ratio
+]
+
+card "DECOMPRESSION" as decompress #FFE0B2 [
+  Reverse Pipeline
+  ----
+  • Entropy Decode
+  • Dequantize
+  • IDCT
+]
+
+card "OUTPUT IMAGE" as output #E3F2FD [
+  Reconstructed RGB
+  ----
+  PSNR: 22.2 dB
+  480×520 pixels
+]
+
+input -right->> compress : **Encode**
+compress -right->> data : **Store/Transmit**
+data -right->> decompress : **Decode**
+decompress -right->> output : **Reconstruct**
+
+legend bottom
+  | Color | Meaning |
+  | <#E3F2FD> | Input/Output |
+  | <#E8F5E9> | Compression |
+  | <#FFF9C4> | Compressed Data |
+  | <#FFE0B2> | Decompression |
+end legend
+
+@enduml
+
+@startuml Figure_1_1_Detailed_Architecture
+!theme plain
+skinparam component {
+  BackgroundColor #E3F2FD
+  BorderColor #1976D2
+}
+
+title Figure 1.1: General Architecture - Detailed View
+
+package "JPEG Compression System" {
+  
+  [Input Image\n480×520 pixels\n748 KB] as input
+  
+  package "Compression Process" #E8F5E9 {
+    [Color Space\nConversion] as color
+    [Block Division\n& DCT] as dct
+    [Quantization\n(Lossy)] as quant
+    [Entropy\nEncoding] as entropy
+  }
+  
+  database "Compressed\nData\n~15 KB\n45:1 ratio" as data #FFF9C4
+  
+  package "Decompression Process" #FFE0B2 {
+    [Entropy\nDecoding] as decode
+    [Dequantization\n& IDCT] as dequant
+    [Color Space\nReconstruction] as recon
+  }
+  
+  [Output Image\nPSNR: 22.2 dB\n480×520 pixels] as output
+}
+
+input --> color
+color --> dct
+dct --> quant
+quant --> entropy
+entropy --> data
+
+data --> decode
+decode --> dequant
+dequant --> recon
+recon --> output
+
+note right of quant
+  Only lossy step
+  Quality vs Size tradeoff
+end note
+
+note left of data
+  Highly compressed
+  Efficient storage
+  Fast transmission
+end note
+
+@enduml
+
+@startuml Figure_1_1_Simple_Flow
+!theme plain
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BorderColor #1976D2
+  FontSize 12
+}
+
+title Figure 1.1: General Architecture - Simple Flow
+
+start
+
+:INPUT IMAGE
+480×520 pixels
+748 KB;
+
+partition "COMPRESSION PROCESS" #E8F5E9 {
+  :8 Steps Pipeline;
+  :• DCT Transform;
+  :• Quantization;
+  :• Entropy Coding;
+}
+
+:COMPRESSED DATA
+Bitstream
+~15 KB
+45:1 ratio;
+
+partition "DECOMPRESSION PROCESS" #FFE0B2 {
+  :Reverse Pipeline;
+  :• Entropy Decode;
+  :• Dequantize;
+  :• IDCT;
+}
+
+:OUTPUT IMAGE
+Reconstructed RGB
+PSNR: 22.2 dB;
+
+stop
+
+@enduml
+
+@startuml Figure_3_1_Standard_JPEG_Pipeline
+!theme plain
+skinparam defaultTextAlignment center
+skinparam BoxPadding 10
+skinparam ParticipantPadding 20
+
+title: Standard JPEG Compression Pipeline
+
+rectangle "RGB Image Input\n(480×520×3)" as input #E3F2FD
+rectangle "Color Conversion\nRGB → YCbCr\nY = 0.299R + 0.587G + 0.114B" as color #E8F5E9
+rectangle "Chroma Subsampling\n(4:2:0)\nY: Full, Cb/Cr: ½" as chroma #E8F5E9
+rectangle "Block Division\n8×8 Blocks\n(3,900 blocks)" as blocks #E3F2FD
+rectangle "Level Shift\n[0,255] → [-128,127]\npixel - 128" as shift #E8F5E9
+rectangle "DCT\nSpatial → Frequency\nF(u,v) = DCT[]" as dct #E8F5E9
+rectangle "⚠️ Quantization ⚠️\n**LOSSY STEP**\nQ = round(DCT/Q_mat)" as quant #FFEBEE
+rectangle "Zigzag Scanning\n2D → 1D Sequence\nLow freq → High freq" as zigzag #FFF9C4
+rectangle "Run-Length Encoding\nCompress Zeros\n[(run, value), ...]" as rle #FFF9C4
+rectangle "Huffman Encoding\nVariable-Length Codes\nFrequent → Short" as huffman #FFF9C4
+rectangle "Compressed Data\n(Bitstream)\n~24 KB" as output #E3F2FD
+
+input -down-> color
+color -down-> chroma
+chroma -down-> blocks
+blocks -down-> shift
+shift -down-> dct
+dct -down-> quant
+quant -down-> zigzag
+zigzag -down-> rle
+rle -down-> huffman
+huffman -down-> output
+
+note right of quant
+  Only lossy step
+  in entire pipeline
+end note
+
+@enduml
+
+@startuml Figure_3_3_System_Architecture
+!theme plain
+skinparam componentStyle rectangle
+
+title : Proposed System Architecture
+
+package "INPUT MODULE" #E3F2FD {
+  [Image Loading]
+  [Validation]
+  [Format Conversion]
+}
+
+package "ANALYSIS MODULE" #E8F5E9 {
+  [Variance\nCalculation] as var
+  [Gradient\nAnalysis] as grad
+  [Edge\nDetection] as edge
+  [Complexity Assessment\nBlock Size Selection] as complex
+  
+  var -down-> complex
+  grad -down-> complex
+  edge -down-> complex
+}
+
+package "COLOR PROCESSING MODULE" #E1BEE7 {
+  [RGB→YCbCr\nConversion] as rgb2ycbcr
+  [Chroma\nAnalysis] as chromanal
+  [Adaptive\nSubsampling] as subsample
+  
+  rgb2ycbcr -right-> chromanal
+  chromanal -right-> subsample
+}
+
+package "ADAPTIVE COMPRESSION MODULE" #FFE0B2 {
+  package "PARALLEL PROCESSING (4 threads)" #FFF9C4 {
+    [Block 1] as b1
+    [Block 2] as b2
+    [Block 3] as b3
+    [Block 4] as b4
+  }
+  
+  rectangle "For Each Block:\n1. Enhanced DCT (multi-scale)\n2. Content-Aware Quantization\n3. Perceptual Optimization\n4. Zigzag Scanning\n5. Run-Length Encoding" as processing #FFCCBC
+  
+  b1 -down-> processing
+  b2 -down-> processing
+  b3 -down-> processing
+  b4 -down-> processing
+}
+
+package "ENTROPY CODING MODULE" #FFCDD2 {
+  [Adaptive\nProbability] as prob
+  [Huffman\nTree] as huff
+  [Bitstream\nGeneration] as bits
+  
+  prob -right-> huff
+  huff -right-> bits
+}
+
+package "OUTPUT MODULE" #E3F2FD {
+  [Compressed Data]
+  [Metadata]
+  [Statistics]
+  note bottom
+    PSNR: 22.22 dB
+    Ratio: 45.96:1
+    Size: 15.9 KB
+  end note
+}
+
+[INPUT MODULE] -down-> [ANALYSIS MODULE]
+[ANALYSIS MODULE] -down-> [COLOR PROCESSING MODULE]
+[COLOR PROCESSING MODULE] -down-> [ADAPTIVE COMPRESSION MODULE]
+[ADAPTIVE COMPRESSION MODULE] -down-> [ENTROPY CODING MODULE]
+[ENTROPY CODING MODULE] -down-> [OUTPUT MODULE]
+
+@enduml
+
+@startuml Figure_3_4_Adaptive_Block_Selection
+!theme plain
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityBorderColor #1976D2
+skinparam activityDiamondBackgroundColor #FFF9C4
+skinparam activityDiamondBorderColor #F57C00
+
+title : Adaptive Block Size Selection Flowchart
+
+start
+
+:Extract 32×32 Region;
+
+:Calculate:
+* Variance
+* Gradient;
+
+:Total Complexity
+= Variance + Gradient;
+
+if (Complexity > 100?) then (yes)
+  #FFE0B2:Use 4×4 Blocks
+  
+  **High Detail**
+  * Preserve Detail
+  * Scale = 0.6
+  * 96.6% of image;
+  stop
+elseif (Complexity < 50?) then (yes)
+  #C8E6C9:Use 16×16 Blocks
+  
+  **Smooth**
+  * High Compression
+  * Scale = 1.3
+  * 1.0% of image;
+  stop
+else (50 ≤ Complexity ≤ 100)
+  #BBDEFB:Use 8×8 Blocks
+  
+  **Medium Detail**
+  * Balanced
+  * Scale = 0.7
+  * 2.4% of image;
+  stop
+endif
+
+@enduml
+
+@startuml Figure_3_5_Quantization_Decision_Tree
+!theme plain
+skinparam activityBackgroundColor #E3F2FD
+skinparam activityBorderColor #1976D2
+skinparam activityDiamondBackgroundColor #FFF9C4
+
+title : Content-Aware Quantization Decision Tree
+
+start
+
+:Input Block (8×8);
+
+:Calculate:
+* Variance
+* Edge Strength
+* Texture;
+
+if (Variance > 100?) then (yes)
+  #FFCDD2:Scale = 0.6
+  **High Detail**
+  Preserve Detail;
+elseif (Variance < 50?) then (yes)
+  #C8E6C9:Scale = 1.3
+  **Smooth**
+  Compress More;
+else (50 ≤ Variance ≤ 100)
+  #FFF9C4:Scale = 0.7
+  **Medium Detail**
+  Balanced;
+endif
+
+if (Edge Detected?) then (yes)
+  :Edge Factor = 0.8
+  (Preserve Edges);
+else (no)
+  :Edge Factor = 1.0
+  (Normal);
+endif
+
+:Apply Perceptual Weighting
+(HVS Model);
+
+:Final Q Matrix
+Q = Base × Scale
+  × Perceptual
+  × Edge Factor;
+
+stop
+
+note right
+  Example:
+  Base = Standard Q Matrix
+  Scale = 0.6 to 1.3
+  Perceptual = CSF weights
+  Edge = 0.8 or 1.0
+end note
+
+@enduml
+
+@startuml Figure_3_3_Alternative_Component
+!theme plain
+
+title Figure 3.3: Proposed System Architecture (Alternative Component View)
+
+[Input Image] as input
+
+component "Analysis Engine" {
+  [Variance Calculator]
+  [Gradient Analyzer]
+  [Edge Detector]
+  [Complexity Assessor]
+}
+
+component "Color Processor" {
+  [RGB to YCbCr]
+  [Chroma Analyzer]
+  [Adaptive Subsampler]
+}
+
+component "Compression Engine" {
+  [Enhanced DCT]
+  [Content-Aware Quantizer]
+  [Perceptual Optimizer]
+  [Zigzag Scanner]
+  [RLE Encoder]
+}
+
+component "Entropy Coder" {
+  [Probability Model]
+  [Huffman Tree Builder]
+  [Bitstream Generator]
+}
+
+component "Parallel Processor" {
+  [Thread Pool Manager]
+  [Load Balancer]
+}
+
+[Output Data] as output
+
+input --> [Analysis Engine]
+[Analysis Engine] --> [Color Processor]
+[Color Processor] --> [Compression Engine]
+[Compression Engine] --> [Entropy Coder]
+[Entropy Coder] --> output
+
+[Parallel Processor] ..> [Compression Engine] : manages
+
+database "Metadata" {
+  [Block Assignments]
+  [Quantization Matrices]
+  [Statistics]
+}
+
+[Compression Engine] --> [Metadata]
+[Metadata] --> output
+
+@enduml
+
+@startuml Figure_3_1_Detailed_Pipeline
+!theme plain
+skinparam sequenceBoxBorderColor #1976D2
+
+title Figure 3.1: Standard JPEG Compression Pipeline (Sequence View)
+
+participant "RGB Image\n480×520×3\n748 KB" as input
+participant "Color\nConverter" as color
+participant "Chroma\nSubsampler" as chroma
+participant "Block\nDivider" as block
+participant "DCT\nTransform" as dct
+participant "Quantizer\n⚠️ LOSSY" as quant
+participant "Zigzag\nScanner" as zigzag
+participant "RLE\nEncoder" as rle
+participant "Huffman\nEncoder" as huffman
+participant "Compressed\nData\n24 KB" as output
+
+input -> color : RGB pixels
+activate color
+color -> chroma : YCbCr channels
+deactivate color
+
+activate chroma
+chroma -> block : Y (full), Cb/Cr (½)
+deactivate chroma
+
+activate block
+block -> dct : 8×8 blocks\n(3,900 blocks)
+deactivate block
+
+activate dct
+dct -> quant : DCT coefficients\n(frequency domain)
+deactivate dct
+
+activate quant
+note right of quant
+  **ONLY LOSSY STEP**
+  Q = round(DCT / Q_matrix)
+  Information loss occurs here
+end note
+quant -> zigzag : Quantized coefficients
+deactivate quant
+
+activate zigzag
+zigzag -> rle : 1D sequence\n(low → high freq)
+deactivate zigzag
+
+activate rle
+rle -> huffman : (run, value) pairs
+deactivate rle
+
+activate huffman
+huffman -> output : Variable-length codes
+deactivate huffman
+
+note over input, output
+  Compression Ratio: 748 KB → 24 KB = 31:1
+  Processing: 9 steps, 1 lossy
+end note
+
+@enduml
+
+@startuml Figure_Block_Size_Distribution
+!theme plain
+
+title Block Size Distribution Analysis
+
+rectangle "Image Analysis Results" {
+  rectangle "4×4 Blocks\n96.6%\n(High Detail Regions)" as small #FFE0B2 {
+    note bottom
+      * Edges
+      * Textures
+      * Fine details
+      * Scale: 0.6
+    end note
+  }
+  
+  rectangle "8×8 Blocks\n2.4%\n(Medium Complexity)" as medium #BBDEFB {
+    note bottom
+      * Moderate detail
+      * Transitions
+      * Scale: 0.7
+    end note
+  }
+  
+  rectangle "16×16 Blocks\n1.0%\n(Smooth Regions)" as large #C8E6C9 {
+    note bottom
+      * Sky
+      * Backgrounds
+      * Uniform areas
+      * Scale: 1.3
+    end note
+  }
+}
+
+@enduml
+
+@startuml Figure_Compression_Comparison
+!theme plain
+skinparam rectangle {
+  BackgroundColor<<paper>> #FFEBEE
+  BackgroundColor<<improved>> #E8F5E9
+  BorderColor #1976D2
+}
+
+title Compression Algorithm Comparison
+
+rectangle "Paper Algorithm" <<paper>> {
+  [Fixed 8×8 Blocks]
+  [Uniform Quantization]
+  [Basic Huffman]
+  [Y-channel Only]
+  [Sequential Processing]
+  
+  note bottom
+    PSNR: 20.83 dB
+    Ratio: 29.91:1
+    Size: 24.4 KB
+    Time: 0.52s
+  end note
+}
+
+rectangle "Improved Algorithm" <<improved>> {
+  [Adaptive Blocks\n4×4/8×8/16×16]
+  [Content-Aware\nQuantization]
+  [Enhanced Entropy\nCoding]
+  [Full YCbCr\nProcessing]
+  [Parallel Processing\n(4 threads)]
+  
+  note bottom
+    PSNR: 22.22 dB (+1.39)
+    Ratio: 45.96:1 (1.54×)
+    Size: 15.9 KB (-35%)
+    Time: 4.92s (9.5×)
+  end note
+}
+
+[Paper Algorithm] -right-> [Improved Algorithm] : Enhancement
+
+@enduml
+
+@startuml Figure_Processing_Flow
+!theme plain
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BorderColor #1976D2
+  DiamondBackgroundColor #FFF9C4
+}
+
+title Complete Processing Flow with Decision Points
+
+|Input|
+start
+:Load RGB Image;
+
+|Analysis|
+:Analyze Content;
+split
+  :Calculate Variance;
+split again
+  :Calculate Gradient;
+split again
+  :Detect Edges;
+end split
+
+:Determine Block Sizes;
+
+|Color Processing|
+:Convert to YCbCr;
+:Analyze Chroma Complexity;
+
+if (High Color Complexity?) then (yes)
+  :Subsampling 4:2:2;
+elseif (Medium?) then (yes)
+  :Subsampling 4:2:0;
+else (low)
+  :Subsampling 4:1:1;
+endif
+
+|Compression|
+fork
+  :Process Block 1;
+fork again
+  :Process Block 2;
+fork again
+  :Process Block 3;
+fork again
+  :Process Block 4;
+end fork
+
+:Collect Results;
+
+|Entropy Coding|
+:Build Huffman Tree;
+:Encode Bitstream;
+
+|Output|
+:Generate Compressed File;
+:Calculate Statistics;
+stop
+
+@enduml
